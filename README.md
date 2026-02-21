@@ -71,17 +71,17 @@ https://sqli-demo.onrender.com
 
 ## 📝 Hướng dẫn sử dụng
 
-### Phiên bản LỖI (Vulnerable)
+### Phiên bản LỖI (Có lỗ hổng)
 Thử nhập:
 - **Username**: `admin' OR '1'='1`
 - **Password**: `anything`
 
 Bạn sẽ đăng nhập thành công mà không cần mật khẩu chính xác!
 
-### Phiên bản AN TOÀN (Secure)
+### Phiên bản AN TOÀN (An toàn)
 Cùng payload trên sẽ không hoạt động. Hãy thử:
 - **Username**: `admin`
-- **Password**: `p@ssw0rd123`
+- **Password**: `admin123`
 
 ## 🔍 Giải thích kỹ thuật
 
@@ -123,7 +123,7 @@ MIT License - Tự do sử dụng cho mục đích học tập và nghiên cứu
 
 ---
 
-**Tác giả**: Manus AI  
+**Tác giả**: Nguyen Doan Quynh Nhu  
 **Ngày tạo**: 2026-02-21  
 **Phiên bản**: 1.0.0
 # sqli-demo

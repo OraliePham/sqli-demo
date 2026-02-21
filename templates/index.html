@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL Injection Demo - Học về Bảo Mật Web</title>
+    <title>OWASP Lab - Bảo Mật Ứng Dụng Web</title>
     <style>
         * {
             margin: 0;
@@ -15,15 +15,12 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
-            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
         }
 
         .header {
@@ -33,7 +30,7 @@
         }
 
         .header h1 {
-            font-size: 2.5em;
+            font-size: 2.8em;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
@@ -41,6 +38,78 @@
         .header p {
             font-size: 1.1em;
             opacity: 0.9;
+        }
+
+        .security-toggle {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .toggle-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #ccc;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: #27ae60;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            left: 32px;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .status-badge.vulnerable {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .status-badge.secure {
+            background: #27ae60;
+            color: white;
         }
 
         .content {
@@ -62,45 +131,24 @@
             transform: translateY(-5px);
         }
 
-        .card.vulnerable {
-            border-top: 4px solid #e74c3c;
-        }
-
-        .card.secure {
-            border-top: 4px solid #27ae60;
-        }
-
         .card h2 {
             margin-bottom: 20px;
+            color: #333;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .card.vulnerable h2 {
-            color: #e74c3c;
+        .card-section {
+            margin-bottom: 25px;
         }
 
-        .card.secure h2 {
-            color: #27ae60;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-        }
-
-        .badge.vulnerable {
-            background: #e74c3c;
-            color: white;
-        }
-
-        .badge.secure {
-            background: #27ae60;
-            color: white;
+        .card-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
         }
 
         .form-group {
@@ -115,19 +163,27 @@
         }
 
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        textarea {
             width: 100%;
             padding: 10px;
             border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 1em;
+            font-family: inherit;
             transition: border-color 0.3s ease;
         }
 
         input[type="text"]:focus,
-        input[type="password"]:focus {
+        input[type="password"]:focus,
+        textarea:focus {
             outline: none;
             border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
         }
 
         button {
@@ -186,9 +242,11 @@
             border-radius: 5px;
             margin-top: 10px;
             font-family: 'Courier New', monospace;
-            font-size: 0.9em;
+            font-size: 0.85em;
             word-break: break-all;
             color: #333;
+            max-height: 150px;
+            overflow-y: auto;
         }
 
         .info-box {
@@ -198,11 +256,7 @@
             margin-bottom: 20px;
             border-radius: 5px;
             color: #1565c0;
-        }
-
-        .info-box strong {
-            display: block;
-            margin-bottom: 5px;
+            font-size: 0.95em;
         }
 
         .test-accounts {
@@ -212,6 +266,7 @@
             border-radius: 5px;
             margin-bottom: 20px;
             color: #856404;
+            font-size: 0.9em;
         }
 
         .test-accounts strong {
@@ -222,20 +277,60 @@
         .account-item {
             padding: 5px 0;
             font-family: 'Courier New', monospace;
+        }
+
+        .comments-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 15px;
+        }
+
+        .comment-item {
+            background: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .comment-username {
+            font-weight: 600;
+            color: #667eea;
             font-size: 0.9em;
+        }
+
+        .comment-content {
+            margin-top: 5px;
+            color: #333;
+            word-break: break-word;
+        }
+
+        .comment-time {
+            font-size: 0.8em;
+            color: #999;
+            margin-top: 5px;
         }
 
         .footer {
             background: white;
-            padding: 20px;
+            padding: 30px;
             border-radius: 10px;
             text-align: center;
             color: #666;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
+        .footer h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
         .footer p {
             margin-bottom: 10px;
+            line-height: 1.6;
         }
 
         .footer code {
@@ -243,16 +338,6 @@
             padding: 2px 6px;
             border-radius: 3px;
             font-family: 'Courier New', monospace;
-        }
-
-        @media (max-width: 768px) {
-            .content {
-                grid-template-columns: 1fr;
-            }
-
-            .header h1 {
-                font-size: 1.8em;
-            }
         }
 
         .loading {
@@ -276,175 +361,355 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        @media (max-width: 1024px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .security-toggle {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 SQL Injection Demo</h1>
-            <p>Học cách tấn công và phòng chống lỗ hổng SQL Injection</p>
+            <h1>🔐 OWASP Lab - Bảo Mật Ứng Dụng Web</h1>
+            <p>Học về SQL Injection, XSS và cách phòng chống theo tiêu chuẩn OWASP Top 10</p>
         </div>
 
+        <!-- Security Toggle -->
+        <div class="security-toggle">
+            <div class="toggle-section">
+                <span class="toggle-label">Chế độ Bảo mật:</span>
+                <div class="toggle-switch" id="securityToggle"></div>
+            </div>
+            <div class="toggle-section">
+                <span class="status-badge vulnerable" id="statusBadge">TẮT ✗ (Có lỗ hổng)</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
         <div class="content">
-            <!-- Card 1: Phiên bản có lỗi -->
-            <div class="card vulnerable">
-                <h2>
-                    ❌ Trang web LỖI
-                    <span class="badge vulnerable">Vulnerable</span>
-                </h2>
+            <!-- SQL Injection Lab -->
+            <div class="card">
+                <h2>💉 SQL Injection (SQLi)</h2>
 
-                <div class="info-box">
-                    <strong>Cảnh báo:</strong>
-                    Trang này có lỗ hổng SQL Injection. Bạn có thể đăng nhập mà không cần mật khẩu chính xác!
+                <div class="card-section">
+                    <h3>1️⃣ Đăng Nhập</h3>
+                    <div class="info-box">
+                        <strong>Khi TẮT:</strong> Thử nhập <code>admin' OR '1'='1</code> vào Username để bypass đăng nhập!
+                    </div>
+
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label for="username">Tên đăng nhập:</label>
+                            <input type="text" id="username" placeholder="Nhập tên đăng nhập">
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Mật khẩu:</label>
+                            <input type="password" id="password" placeholder="Nhập mật khẩu">
+                        </div>
+                        <button type="submit">Đăng Nhập</button>
+                    </form>
+
+                    <div id="loginResult" class="result"></div>
+                    <div id="loginLoading" class="loading">
+                        <div class="spinner"></div>
+                        <span>Đang xử lý...</span>
+                    </div>
+
+                    <div class="test-accounts">
+                        <strong>💡 Tài khoản test:</strong>
+                        <div class="account-item">admin / admin123</div>
+                        <div class="account-item">user1 / password1</div>
+                        <div class="account-item">nhu / nhu2026</div>
+                    </div>
                 </div>
 
-                <div class="test-accounts">
-                    <strong>💡 Hướng dẫn tấn công:</strong>
-                    <div class="account-item">Username: <code>admin' OR '1'='1</code></div>
-                    <div class="account-item">Password: <code>anything</code></div>
-                </div>
+                <div class="card-section">
+                    <h3>2️⃣ Tìm Kiếm Sản Phẩm</h3>
+                    <form id="searchForm">
+                        <div class="form-group">
+                            <label for="searchProduct">Tìm kiếm:</label>
+                            <input type="text" id="searchProduct" placeholder="Nhập tên sản phẩm">
+                        </div>
+                        <button type="submit">Tìm Kiếm</button>
+                    </form>
 
-                <form id="vulnerableForm">
-                    <div class="form-group">
-                        <label for="vuln-username">Tên đăng nhập:</label>
-                        <input type="text" id="vuln-username" name="username" placeholder="Nhập tên đăng nhập">
+                    <div id="searchResult" class="result"></div>
+                    <div id="searchLoading" class="loading">
+                        <div class="spinner"></div>
+                        <span>Đang tìm kiếm...</span>
                     </div>
-                    <div class="form-group">
-                        <label for="vuln-password">Mật khẩu:</label>
-                        <input type="password" id="vuln-password" name="password" placeholder="Nhập mật khẩu">
-                    </div>
-                    <button type="submit">Đăng Nhập (Phiên bản Lỗi)</button>
-                </form>
-
-                <div id="vulnerableResult" class="result"></div>
-                <div id="vulnerableLoading" class="loading">
-                    <div class="spinner"></div>
-                    <span>Đang xử lý...</span>
                 </div>
             </div>
 
-            <!-- Card 2: Phiên bản an toàn -->
-            <div class="card secure">
-                <h2>
-                    ✅ Trang web AN TOÀN
-                    <span class="badge secure">Secure</span>
-                </h2>
+            <!-- XSS Lab -->
+            <div class="card">
+                <h2>🔤 Cross-Site Scripting (XSS)</h2>
 
-                <div class="info-box">
-                    <strong>Thông tin:</strong>
-                    Trang này sử dụng Parameterized Queries. Các ký tự đặc biệt được coi là dữ liệu, không phải mã lệnh.
+                <div class="card-section">
+                    <h3>1️⃣ XSS Lưu Trữ (Stored XSS) - Bình Luận</h3>
+                    <div class="info-box">
+                        <strong>Khi TẮT:</strong> Thử nhập <code>&lt;img src=x onerror="alert('XSS')"&gt;</code> để thực thi mã JavaScript!
+                    </div>
+
+                    <form id="commentForm">
+                        <div class="form-group">
+                            <label for="commentUsername">Tên người dùng:</label>
+                            <input type="text" id="commentUsername" placeholder="Nhập tên" value="Ẩn danh">
+                        </div>
+                        <div class="form-group">
+                            <label for="commentContent">Bình luận:</label>
+                            <textarea id="commentContent" placeholder="Nhập bình luận của bạn"></textarea>
+                        </div>
+                        <button type="submit">Đăng Bình Luận</button>
+                    </form>
+
+                    <div id="commentResult" class="result"></div>
+
+                    <div class="comments-list" id="commentsList">
+                        <p style="text-align: center; color: #999;">Chưa có bình luận nào</p>
+                    </div>
+
+                    <button style="margin-top: 10px; background: #e74c3c;" id="clearComments">Xóa Tất Cả Bình Luận</button>
                 </div>
 
-                <div class="test-accounts">
-                    <strong>💡 Tài khoản test:</strong>
-                    <div class="account-item">admin / p@ssw0rd123</div>
-                    <div class="account-item">manus / ai_assistant_2026</div>
-                    <div class="account-item">demo / demo123</div>
-                </div>
+                <div class="card-section">
+                    <h3>2️⃣ XSS Phản Chiếu (Reflected XSS) - Tìm Kiếm</h3>
+                    <form id="reflectForm">
+                        <div class="form-group">
+                            <label for="reflectSearch">Tìm kiếm:</label>
+                            <input type="text" id="reflectSearch" placeholder="Nhập từ khóa">
+                        </div>
+                        <button type="submit">Tìm Kiếm</button>
+                    </form>
 
-                <form id="secureForm">
-                    <div class="form-group">
-                        <label for="secure-username">Tên đăng nhập:</label>
-                        <input type="text" id="secure-username" name="username" placeholder="Nhập tên đăng nhập">
-                    </div>
-                    <div class="form-group">
-                        <label for="secure-password">Mật khẩu:</label>
-                        <input type="password" id="secure-password" name="password" placeholder="Nhập mật khẩu">
-                    </div>
-                    <button type="submit">Đăng Nhập (Phiên bản An Toàn)</button>
-                </form>
-
-                <div id="secureResult" class="result"></div>
-                <div id="secureLoading" class="loading">
-                    <div class="spinner"></div>
-                    <span>Đang xử lý...</span>
+                    <div id="reflectResult" class="result"></div>
                 </div>
             </div>
         </div>
 
+        <!-- Footer -->
         <div class="footer">
-            <p><strong>📚 Giáo dục Bảo Mật Web</strong></p>
-            <p>Dự án này được tạo để giúp lập trình viên hiểu rõ hơn về lỗ hổng SQL Injection và cách phòng chống.</p>
-            <p>Mã nguồn: <code>Parameterized Queries (Prepared Statements)</code> là cách tốt nhất để ngăn chặn SQLi.</p>
+            <h3>📚 Giáo Dục Bảo Mật Web</h3>
+            <p><strong>OWASP Top 10:</strong> Danh sách 10 lỗ hổng bảo mật web nguy hiểm nhất</p>
+            <p><strong>Mục tiêu:</strong> Giúp lập trình viên hiểu rõ cách lỗ hổng xảy ra và cách phòng chống</p>
+            <p><strong>Lưu ý:</strong> Dự án này chỉ dành cho mục đích giáo dục. Việc tấn công hệ thống thực tế mà không có sự cho phép là hành vi vi phạm pháp luật.</p>
         </div>
     </div>
 
     <script>
-        // Xử lý form Vulnerable
-        document.getElementById('vulnerableForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // ============================================================================
+        // SECURITY TOGGLE
+        // ============================================================================
+        const securityToggle = document.getElementById('securityToggle');
+        const statusBadge = document.getElementById('statusBadge');
+
+        async function updateSecurityMode(secure) {
+            const response = await fetch('/api/set_security_mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ secure })
+            });
+            const data = await response.json();
             
-            const username = document.getElementById('vuln-username').value;
-            const password = document.getElementById('vuln-password').value;
-            const resultDiv = document.getElementById('vulnerableResult');
-            const loadingDiv = document.getElementById('vulnerableLoading');
+            if (secure) {
+                securityToggle.classList.add('active');
+                statusBadge.className = 'status-badge secure';
+                statusBadge.textContent = 'BẬT ✓ (An toàn)';
+            } else {
+                securityToggle.classList.remove('active');
+                statusBadge.className = 'status-badge vulnerable';
+                statusBadge.textContent = 'TẮT ✗ (Có lỗ hổng)';
+            }
+        }
+
+        securityToggle.addEventListener('click', () => {
+            const isActive = securityToggle.classList.contains('active');
+            updateSecurityMode(!isActive);
+        });
+
+        // ============================================================================
+        // LOGIN FORM
+        // ============================================================================
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('loginResult');
+            const loadingDiv = document.getElementById('loginLoading');
 
             loadingDiv.style.display = 'block';
             resultDiv.style.display = 'none';
 
             try {
-                const response = await fetch('/api/login_vulnerable', {
+                const response = await fetch('/api/login', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password })
                 });
-
                 const data = await response.json();
                 loadingDiv.style.display = 'none';
 
                 resultDiv.className = `result ${data.status}`;
                 let html = `<strong>${data.message}</strong>`;
-                
                 if (data.query_executed) {
                     html += `<div class="query-display"><strong>SQL thực thi:</strong><br>${data.query_executed}</div>`;
                 }
-                
                 resultDiv.innerHTML = html;
                 resultDiv.style.display = 'block';
             } catch (error) {
                 loadingDiv.style.display = 'none';
                 resultDiv.className = 'result error';
-                resultDiv.innerHTML = `<strong>❌ Lỗi kết nối: ${error.message}</strong>`;
+                resultDiv.innerHTML = `<strong>❌ Lỗi: ${error.message}</strong>`;
                 resultDiv.style.display = 'block';
             }
         });
 
-        // Xử lý form Secure
-        document.getElementById('secureForm').addEventListener('submit', async (e) => {
+        // ============================================================================
+        // SEARCH FORM
+        // ============================================================================
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            const username = document.getElementById('secure-username').value;
-            const password = document.getElementById('secure-password').value;
-            const resultDiv = document.getElementById('secureResult');
-            const loadingDiv = document.getElementById('secureLoading');
+            const search = document.getElementById('searchProduct').value;
+            const resultDiv = document.getElementById('searchResult');
+            const loadingDiv = document.getElementById('searchLoading');
 
             loadingDiv.style.display = 'block';
             resultDiv.style.display = 'none';
 
             try {
-                const response = await fetch('/api/login_secure', {
+                const response = await fetch('/api/search_product', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ search })
                 });
-
                 const data = await response.json();
                 loadingDiv.style.display = 'none';
+
+                resultDiv.className = `result ${data.status}`;
+                let html = `<strong>Tìm thấy ${data.products.length} sản phẩm:</strong><br>`;
+                data.products.forEach(p => {
+                    html += `<div style="margin-top: 10px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+                        <strong>${p.name}</strong> - $${p.price}<br>
+                        <small>${p.description}</small>
+                    </div>`;
+                });
+                if (data.query_executed) {
+                    html += `<div class="query-display"><strong>SQL thực thi:</strong><br>${data.query_executed}</div>`;
+                }
+                resultDiv.innerHTML = html;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Lỗi: ${error.message}</strong>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        // ============================================================================
+        // COMMENT FORM
+        // ============================================================================
+        document.getElementById('commentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('commentUsername').value;
+            const content = document.getElementById('commentContent').value;
+            const resultDiv = document.getElementById('commentResult');
+
+            try {
+                const response = await fetch('/api/post_comment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, content })
+                });
+                const data = await response.json();
+
+                resultDiv.className = `result ${data.status}`;
+                resultDiv.innerHTML = `<strong>${data.message}</strong>`;
+                resultDiv.style.display = 'block';
+
+                if (data.status === 'success') {
+                    document.getElementById('commentContent').value = '';
+                    loadComments();
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Lỗi: ${error.message}</strong>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        // Load comments
+        async function loadComments() {
+            try {
+                const response = await fetch('/api/get_comments');
+                const data = await response.json();
+                const commentsList = document.getElementById('commentsList');
+
+                if (data.comments.length === 0) {
+                    commentsList.innerHTML = '<p style="text-align: center; color: #999;">Chưa có bình luận nào</p>';
+                } else {
+                    commentsList.innerHTML = data.comments.map(c => `
+                        <div class="comment-item">
+                            <div class="comment-username">${c.username}</div>
+                            <div class="comment-content">${c.content}</div>
+                            <div class="comment-time">${new Date(c.created_at).toLocaleString('vi-VN')}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Lỗi tải bình luận:', error);
+            }
+        }
+
+        // Clear comments
+        document.getElementById('clearComments').addEventListener('click', async () => {
+            if (confirm('Bạn chắc chắn muốn xóa tất cả bình luận?')) {
+                await fetch('/api/clear_comments', { method: 'POST' });
+                loadComments();
+            }
+        });
+
+        // ============================================================================
+        // REFLECTED XSS FORM
+        // ============================================================================
+        document.getElementById('reflectForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const search = document.getElementById('reflectSearch').value;
+            const resultDiv = document.getElementById('reflectResult');
+
+            try {
+                const response = await fetch('/api/search_reflect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ search })
+                });
+                const data = await response.json();
 
                 resultDiv.className = `result ${data.status}`;
                 resultDiv.innerHTML = `<strong>${data.message}</strong>`;
                 resultDiv.style.display = 'block';
             } catch (error) {
-                loadingDiv.style.display = 'none';
                 resultDiv.className = 'result error';
-                resultDiv.innerHTML = `<strong>❌ Lỗi kết nối: ${error.message}</strong>`;
+                resultDiv.innerHTML = `<strong>❌ Lỗi: ${error.message}</strong>`;
                 resultDiv.style.display = 'block';
             }
         });
+
+        // Load comments on page load
+        loadComments();
     </script>
 </body>
 </html>
