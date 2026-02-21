@@ -1,13 +1,16 @@
-# 🔐 SQL Injection Demo - Học về Bảo Mật Web
+# 🔐 OWASP Top 10 Lab - SQL Injection & XSS
 
-Đây là một ứng dụng web giáo dục minh họa lỗ hổng **SQL Injection** và cách phòng chống.
+Đây là ứng dụng web giáo dục minh họa có chủ đích các lỗ hổng **SQL Injection** và **Cross-Site Scripting (XSS)**, kèm chế độ an toàn để so sánh cách phòng chống.
 
 ## 📋 Mục đích
 
-Dự án này giúp lập trình viên và học viên hiểu rõ hơn về:
-- Cách lỗ hổng SQL Injection xảy ra
-- Tại sao nó nguy hiểm
-- Cách phòng chống bằng **Parameterized Queries**
+Dự án giúp sinh viên hiểu rõ hơn về:
+- SQLi: bypass login, UNION exfiltration, Blind SQLi (time-based)
+- XSS: Stored, Reflected, DOM-based, và encode theo ngữ cảnh
+- Theo dõi tấn công qua log bảo mật
+- Mô phỏng tác động thực tế (token exfiltration trong lab)
+- Cách vá lỗi chuẩn bằng Parameterized Query + Output Encoding
+- Cách tự kiểm chứng bằng test tự động
 
 ## 🚀 Cách chạy trên máy tính cá nhân
 
@@ -20,6 +23,11 @@ Dự án này giúp lập trình viên và học viên hiểu rõ hơn về:
 pip install -r requirements.txt
 ```
 
+### Bước 1.1 (khuyến nghị): Cài bộ kiểm thử
+```bash
+pip install -r requirements-dev.txt
+```
+
 ### Bước 2: Chạy ứng dụng
 ```bash
 python app.py
@@ -27,6 +35,25 @@ python app.py
 
 ### Bước 3: Truy cập trên trình duyệt
 Mở trình duyệt và truy cập: `http://127.0.0.1:5000`
+
+## 🧪 Nội dung lab mở rộng
+
+- SQLi:
+  - Đăng nhập bypass
+  - UNION SELECT trích xuất dữ liệu
+  - Blind SQLi time-based với `sleep()`
+- XSS:
+  - Stored XSS
+  - Reflected XSS
+  - DOM XSS qua hash sink
+  - Context encoding demo (HTML body, attribute, JS string, URL)
+- CTF mini:
+  - Mỗi khai thác thành công nhận 1 flag trong session
+- Monitoring:
+  - Nhật ký payload nghi vấn theo endpoint
+- Bài tập Fix-Me:
+  - `exercises/fix_me_sqli.py`
+  - `exercises/fix_me_xss.py`
 
 ## 🌐 Deploy lên Render (Miễn phí)
 
@@ -107,10 +134,30 @@ cursor.execute(query, (username, password))
 
 Các tham số được truyền riêng biệt, nên các ký tự đặc biệt được coi là dữ liệu, không phải mã lệnh.
 
+## ✅ Chạy kiểm thử
+
+```bash
+python -m pytest -q
+```
+
+Kỳ vọng: toàn bộ test pass cho cả kịch bản vulnerable và secure.
+
+## 📎 Tài liệu kiểm chứng & tài liệu nguồn
+
+- Tài liệu kiểm chứng: `docs/verification_report.md`
+- Checklist OWASP theo lab: `docs/owasp_checklist.md`
+- Tài liệu nguồn tham chiếu: `docs/source_references.md`
+- Ví dụ nâng cao DevTools Console: `docs/devtools_console_examples.md`
+- Câu hỏi thảo luận theo demo: `docs/discussion_questions.md`
+- Lời giải + dẫn chứng thực tế: `docs/discussion_answers.md`
+
 ## 📚 Tài liệu tham khảo
 
 - [OWASP SQL Injection](https://owasp.org/www-community/attacks/SQL_Injection)
+- [OWASP Cross-Site Scripting (XSS)](https://owasp.org/www-community/attacks/xss/)
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [CWE-89: SQL Injection](https://cwe.mitre.org/data/definitions/89.html)
+- [CWE-79: Cross-Site Scripting](https://cwe.mitre.org/data/definitions/79.html)
 - [SQLite Parameterized Queries](https://www.sqlite.org/appfunc.html)
 
 ## ⚠️ Lưu ý quan trọng

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OWASP Lab - Bảo Mật Ứng Dụng Web</title>
+    <title> Bảo Mật Ứng Dụng & Đánh Giá Lỗ Hổng</title>
     <style>
         * {
             margin: 0;
@@ -314,6 +314,65 @@
             margin-top: 5px;
         }
 
+        .mini-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .mono-block {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.82em;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .token-box {
+            background: #f4f0ff;
+            border: 1px solid #d6c6ff;
+            border-radius: 6px;
+            padding: 10px;
+            color: #3e2a6d;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 10px;
+        }
+
+        .flag-list, .event-list {
+            max-height: 260px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            background: #fafafa;
+        }
+
+        .flag-item {
+            border-left: 3px solid #27ae60;
+            padding: 8px 10px;
+            background: #effaf2;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .event-item {
+            border-left: 3px solid #e67e22;
+            padding: 8px 10px;
+            background: #fff6ec;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .event-meta {
+            color: #666;
+            font-size: 0.8em;
+            margin-bottom: 5px;
+        }
+
         .footer {
             background: white;
             padding: 30px;
@@ -383,7 +442,8 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔐 OWASP Lab - Bảo Mật Ứng Dụng Web</h1>
+            <h1>🔐  Bảo Mật Ứng Dụng & Đánh Giá Lỗ Hổng</h1>
+            <h2>Thực hiện bởi nhóm : Nguyễn Đoàn Quỳnh Như</h2>
             <p>Học về SQL Injection, XSS và cách phòng chống theo tiêu chuẩn OWASP Top 10</p>
         </div>
 
@@ -498,11 +558,103 @@
                     <div id="reflectResult" class="result"></div>
                 </div>
             </div>
+
+            <!-- Advanced Lab -->
+            <div class="card">
+                <h2>🧪 Bài Lab Nâng Cao</h2>
+
+                <div class="card-section">
+                    <h3>3️⃣ Blind SQLi (Time-based)</h3>
+                    <div class="info-box">
+                        <strong>Gợi ý payload:</strong> <code>admin' OR sleep(1)=0 --</code> và quan sát <code>duration_ms</code>.
+                    </div>
+                    <form id="blindForm">
+                        <div class="form-group">
+                            <label for="blindProbe">Chuỗi thăm dò:</label>
+                            <input type="text" id="blindProbe" placeholder="Nhập payload blind SQLi">
+                        </div>
+                        <button type="submit">Thực Thi Blind Check</button>
+                    </form>
+                    <div id="blindResult" class="result"></div>
+                </div>
+
+                <div class="card-section">
+                    <h3>4️⃣ DOM XSS (hash sink)</h3>
+                    <div class="info-box">
+                        <strong>Khi TẮT:</strong> hash được render bằng <code>innerHTML</code>. Khi BẬT: dùng <code>textContent</code>.
+                    </div>
+                    <form id="domForm">
+                        <div class="form-group">
+                            <label for="domPayload">Payload hash:</label>
+                            <input type="text" id="domPayload" placeholder="<img src=x onerror=&quot;alert('DOM XSS')&quot;>">
+                        </div>
+                        <button type="submit">Cập Nhật Hash & Render</button>
+                    </form>
+                    <div class="query-display" id="domSink">Chưa có hash payload.</div>
+                </div>
+
+                <div class="card-section">
+                    <h3>5️⃣ Context Encoding Lab</h3>
+                    <form id="contextForm">
+                        <div class="form-group">
+                            <label for="contextInput">Dữ liệu đầu vào:</label>
+                            <input type="text" id="contextInput" placeholder="Ví dụ: '><script>alert(1)</script>">
+                        </div>
+                        <button type="submit">So Sánh Encode Theo Ngữ Cảnh</button>
+                    </form>
+                    <div class="mini-grid" style="margin-top: 10px;">
+                        <div>
+                            <strong>Mẫu dễ lỗi:</strong>
+                            <div id="contextVuln" class="mono-block">Chưa có dữ liệu.</div>
+                        </div>
+                        <div>
+                            <strong>Mẫu an toàn:</strong>
+                            <div id="contextSecure" class="mono-block">Chưa có dữ liệu.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTF & Monitoring -->
+            <div class="card">
+                <h2>🏁 CTF & Giám Sát</h2>
+
+                <div class="card-section">
+                    <h3>6️⃣ Mô phỏng tác động XSS (token)</h3>
+                    <div id="labTokenBox" class="token-box">Đang tải token...</div>
+                    <div class="mini-grid">
+                        <button id="refreshToken">Làm Mới Token</button>
+                        <button id="simulateSteal">Giả Lập Đánh Cắp Token</button>
+                    </div>
+                    <div id="impactResult" class="result"></div>
+                </div>
+
+                <div class="card-section">
+                    <h3>7️⃣ Cờ CTF Đã Thu Thập</h3>
+                    <button id="refreshFlags">Tải Lại Cờ</button>
+                    <div id="flagList" class="flag-list" style="margin-top: 10px;">
+                        <p style="color: #666;">Chưa có cờ nào.</p>
+                    </div>
+                </div>
+
+                <div class="card-section">
+                    <h3>8️⃣ Nhật Ký Sự Kiện Bảo Mật</h3>
+                    <div class="mini-grid">
+                        <button id="refreshEvents">Tải Log</button>
+                        <button id="clearEvents" style="background: #e67e22;">Xóa Log</button>
+                        <button id="resetLab" style="background: #e74c3c;">Reset Trạng Thái Lab</button>
+                    </div>
+                    <div id="eventList" class="event-list" style="margin-top: 10px;">
+                        <p style="color: #666;">Chưa có sự kiện.</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Footer -->
         <div class="footer">
-            <h3>📚 Giáo Dục Bảo Mật Web</h3>
+            <h3>📚Môn học: Bảo mật thông tin.</h3>
+            <h2><strong>Đây là bài tập thực hành được thực hiện bởi nhóm: Nguyễn Đoàn Quỳnh Như</strong></h2>
             <p><strong>OWASP Top 10:</strong> Danh sách 10 lỗ hổng bảo mật web nguy hiểm nhất</p>
             <p><strong>Mục tiêu:</strong> Giúp lập trình viên hiểu rõ cách lỗ hổng xảy ra và cách phòng chống</p>
             <p><strong>Lưu ý:</strong> Dự án này chỉ dành cho mục đích giáo dục. Việc tấn công hệ thống thực tế mà không có sự cho phép là hành vi vi phạm pháp luật.</p>
@@ -515,15 +667,10 @@
         // ============================================================================
         const securityToggle = document.getElementById('securityToggle');
         const statusBadge = document.getElementById('statusBadge');
+        let currentSecureMode = false;
 
-        async function updateSecurityMode(secure) {
-            const response = await fetch('/api/set_security_mode', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ secure })
-            });
-            const data = await response.json();
-            
+        function updateSecurityBadge(secure) {
+            currentSecureMode = secure;
             if (secure) {
                 securityToggle.classList.add('active');
                 statusBadge.className = 'status-badge secure';
@@ -533,6 +680,17 @@
                 statusBadge.className = 'status-badge vulnerable';
                 statusBadge.textContent = 'TẮT ✗ (Có lỗ hổng)';
             }
+        }
+
+        async function updateSecurityMode(secure) {
+            const response = await fetch('/api/set_security_mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ secure })
+            });
+            const data = await response.json();
+            updateSecurityBadge(Boolean(data.secure_mode));
+            renderDomSink();
         }
 
         securityToggle.addEventListener('click', () => {
@@ -567,8 +725,13 @@
                 if (data.query_executed) {
                     html += `<div class="query-display"><strong>SQL thực thi:</strong><br>${data.query_executed}</div>`;
                 }
+                if (data.flag_awarded) {
+                    html += `<div class="query-display"><strong>🏁 Nhận cờ:</strong> FLAG-SQLI-LOGIN-001</div>`;
+                }
                 resultDiv.innerHTML = html;
                 resultDiv.style.display = 'block';
+                await loadFlags();
+                await loadSecurityEvents();
             } catch (error) {
                 loadingDiv.style.display = 'none';
                 resultDiv.className = 'result error';
@@ -609,8 +772,13 @@
                 if (data.query_executed) {
                     html += `<div class="query-display"><strong>SQL thực thi:</strong><br>${data.query_executed}</div>`;
                 }
+                if (data.flag_awarded) {
+                    html += `<div class="query-display"><strong>🏁 Nhận cờ:</strong> FLAG-SQLI-UNION-002</div>`;
+                }
                 resultDiv.innerHTML = html;
                 resultDiv.style.display = 'block';
+                await loadFlags();
+                await loadSecurityEvents();
             } catch (error) {
                 loadingDiv.style.display = 'none';
                 resultDiv.className = 'result error';
@@ -637,13 +805,19 @@
                 const data = await response.json();
 
                 resultDiv.className = `result ${data.status}`;
-                resultDiv.innerHTML = `<strong>${data.message}</strong>`;
+                let html = `<strong>${data.message}</strong>`;
+                if (data.flag_awarded) {
+                    html += `<div class="query-display"><strong>🏁 Nhận cờ:</strong> FLAG-XSS-STORED-004</div>`;
+                }
+                resultDiv.innerHTML = html;
                 resultDiv.style.display = 'block';
 
                 if (data.status === 'success') {
                     document.getElementById('commentContent').value = '';
                     loadComments();
                 }
+                await loadFlags();
+                await loadSecurityEvents();
             } catch (error) {
                 resultDiv.className = 'result error';
                 resultDiv.innerHTML = `<strong>❌ Lỗi: ${error.message}</strong>`;
@@ -679,6 +853,7 @@
             if (confirm('Bạn chắc chắn muốn xóa tất cả bình luận?')) {
                 await fetch('/api/clear_comments', { method: 'POST' });
                 loadComments();
+                loadSecurityEvents();
             }
         });
 
@@ -699,8 +874,14 @@
                 const data = await response.json();
 
                 resultDiv.className = `result ${data.status}`;
-                resultDiv.innerHTML = `<strong>${data.message}</strong>`;
+                let html = `<strong>${data.message}</strong>`;
+                if (data.flag_awarded) {
+                    html += `<div class="query-display"><strong>🏁 Nhận cờ:</strong> FLAG-XSS-REFLECTED-005</div>`;
+                }
+                resultDiv.innerHTML = html;
                 resultDiv.style.display = 'block';
+                await loadFlags();
+                await loadSecurityEvents();
             } catch (error) {
                 resultDiv.className = 'result error';
                 resultDiv.innerHTML = `<strong>❌ Lỗi: ${error.message}</strong>`;
@@ -708,8 +889,256 @@
             }
         });
 
+        // ============================================================================
+        // BLIND SQLI FORM
+        // ============================================================================
+        document.getElementById('blindForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const probe = document.getElementById('blindProbe').value;
+            const resultDiv = document.getElementById('blindResult');
+
+            try {
+                const response = await fetch('/api/blind_check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ probe })
+                });
+                const data = await response.json();
+
+                resultDiv.className = `result ${data.status}`;
+                let html = `<strong>${data.message}</strong>`;
+                html += `<div class="query-display"><strong>Thời gian phản hồi:</strong> ${data.duration_ms} ms</div>`;
+                if (data.query_executed) {
+                    html += `<div class="query-display"><strong>SQL thực thi:</strong><br>${data.query_executed}</div>`;
+                }
+                if (data.flag_awarded) {
+                    html += `<div class="query-display"><strong>🏁 Nhận cờ:</strong> FLAG-SQLI-BLIND-003</div>`;
+                }
+                resultDiv.innerHTML = html;
+                resultDiv.style.display = 'block';
+                await loadFlags();
+                await loadSecurityEvents();
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Lỗi: ${error.message}</strong>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        // ============================================================================
+        // DOM XSS DEMO
+        // ============================================================================
+        function decodeHashPayload() {
+            const raw = window.location.hash ? window.location.hash.slice(1) : '';
+            if (!raw) {
+                return '';
+            }
+            try {
+                return decodeURIComponent(raw);
+            } catch (error) {
+                return raw;
+            }
+        }
+
+        async function renderDomSink() {
+            const domSink = document.getElementById('domSink');
+            const payload = decodeHashPayload();
+            if (!payload) {
+                domSink.textContent = 'Chưa có hash payload.';
+                return;
+            }
+
+            if (currentSecureMode) {
+                domSink.textContent = payload;
+            } else {
+                domSink.innerHTML = payload;
+                await fetch('/api/claim_dom_xss', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ payload })
+                });
+            }
+            await loadFlags();
+            await loadSecurityEvents();
+        }
+
+        document.getElementById('domForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = document.getElementById('domPayload').value;
+            window.location.hash = encodeURIComponent(payload);
+            await renderDomSink();
+        });
+
+        window.addEventListener('hashchange', renderDomSink);
+
+        // ============================================================================
+        // CONTEXT ENCODING LAB
+        // ============================================================================
+        document.getElementById('contextForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const value = document.getElementById('contextInput').value;
+            const vulnDiv = document.getElementById('contextVuln');
+            const secureDiv = document.getElementById('contextSecure');
+
+            try {
+                const response = await fetch('/api/xss_context_demo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ value })
+                });
+                const data = await response.json();
+                const vuln = data.vulnerable_samples;
+                const sec = data.secure_samples;
+                vulnDiv.textContent =
+`[HTML Body]
+${vuln.html_body}
+
+[HTML Attribute]
+${vuln.html_attribute}
+
+[JS String]
+${vuln.javascript_string}
+
+[URL Query]
+${vuln.url_query}`;
+                secureDiv.textContent =
+`[HTML Body]
+${sec.html_body}
+
+[HTML Attribute]
+${sec.html_attribute}
+
+[JS String]
+${sec.javascript_string}
+
+[URL Query]
+${sec.url_query}`;
+                await loadSecurityEvents();
+            } catch (error) {
+                vulnDiv.textContent = `Lỗi: ${error.message}`;
+                secureDiv.textContent = 'Không lấy được dữ liệu context demo.';
+            }
+        });
+
+        // ============================================================================
+        // IMPACT SIMULATION + CTF + MONITORING
+        // ============================================================================
+        async function loadLabToken() {
+            const tokenBox = document.getElementById('labTokenBox');
+            try {
+                const response = await fetch('/api/lab_token');
+                const data = await response.json();
+                window.labToken = data.token;
+                tokenBox.textContent = `lab_token=${data.token}`;
+            } catch (error) {
+                tokenBox.textContent = `Không tải được token: ${error.message}`;
+            }
+        }
+
+        document.getElementById('refreshToken').addEventListener('click', loadLabToken);
+
+        document.getElementById('simulateSteal').addEventListener('click', async () => {
+            const resultDiv = document.getElementById('impactResult');
+            try {
+                const response = await fetch('/api/capture_token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token: window.labToken || '', source: 'manual-simulation' })
+                });
+                const data = await response.json();
+                resultDiv.className = `result ${data.status}`;
+                let html = `<strong>${data.message}</strong>`;
+                if (data.flag_awarded) {
+                    html += `<div class="query-display"><strong>🏁 Nhận cờ:</strong> FLAG-XSS-IMPACT-007</div>`;
+                }
+                resultDiv.innerHTML = html;
+                resultDiv.style.display = 'block';
+                await loadFlags();
+                await loadSecurityEvents();
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Lỗi: ${error.message}</strong>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        async function loadFlags() {
+            const list = document.getElementById('flagList');
+            try {
+                const response = await fetch('/api/ctf_flags');
+                const data = await response.json();
+                if (!data.flags || data.flags.length === 0) {
+                    list.innerHTML = '<p style="color: #666;">Chưa có cờ nào.</p>';
+                    return;
+                }
+                list.innerHTML = data.flags.map((f) => `
+                    <div class="flag-item">
+                        <div><strong>${f.id}</strong></div>
+                        <div>${f.summary}</div>
+                        <div class="event-meta">${f.earned_at}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                list.innerHTML = `<p style="color: #721c24;">Lỗi tải cờ: ${error.message}</p>`;
+            }
+        }
+
+        async function loadSecurityEvents() {
+            const list = document.getElementById('eventList');
+            try {
+                const response = await fetch('/api/security_events');
+                const data = await response.json();
+                if (!data.events || data.events.length === 0) {
+                    list.innerHTML = '<p style="color: #666;">Chưa có sự kiện.</p>';
+                    return;
+                }
+                list.innerHTML = data.events.map((e) => `
+                    <div class="event-item">
+                        <div class="event-meta">${e.time} | ${e.category} | ${e.secure_mode ? 'Secure' : 'Vulnerable'}</div>
+                        <div><strong>Payload:</strong> ${e.payload}</div>
+                        <div class="event-meta">${e.endpoint} | ${e.note || ''}</div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                list.innerHTML = `<p style="color: #721c24;">Lỗi tải log: ${error.message}</p>`;
+            }
+        }
+
+        document.getElementById('refreshFlags').addEventListener('click', loadFlags);
+        document.getElementById('refreshEvents').addEventListener('click', loadSecurityEvents);
+
+        document.getElementById('clearEvents').addEventListener('click', async () => {
+            await fetch('/api/clear_security_events', { method: 'POST' });
+            await loadSecurityEvents();
+        });
+
+        document.getElementById('resetLab').addEventListener('click', async () => {
+            if (confirm('Bạn chắc chắn muốn reset toàn bộ trạng thái lab?')) {
+                await fetch('/api/reset_lab_state', { method: 'POST' });
+                await loadComments();
+                await loadLabToken();
+                await loadFlags();
+                await loadSecurityEvents();
+            }
+        });
+
+        async function initSecurityState() {
+            try {
+                const response = await fetch('/api/get_security_mode');
+                const data = await response.json();
+                updateSecurityBadge(Boolean(data.secure_mode));
+            } catch (error) {
+                updateSecurityBadge(false);
+            }
+        }
+
         // Load comments on page load
+        initSecurityState();
         loadComments();
+        loadLabToken();
+        loadFlags();
+        loadSecurityEvents();
+        renderDomSink();
     </script>
 </body>
 </html>

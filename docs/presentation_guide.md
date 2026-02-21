@@ -80,7 +80,7 @@ Vì `'1'='1'` luôn đúng, điều kiện `OR` sẽ làm cho toàn bộ mệnh 
 1.  **Đảm bảo chế độ LỖI**: "Chế độ Bảo mật" đang ở trạng thái **TẮT ✗ (Có lỗ hổng)**.
 2.  **Truy cập form Tìm kiếm Sản phẩm**: Trong phần "SQL Injection", tìm mục "2️⃣ Tìm Kiếm Sản Phẩm".
 3.  **Nhập payload**: 
-    *   **Tìm kiếm**: `%' UNION SELECT 1, username, password FROM users --`
+    *   **Tìm kiếm**: `%' UNION SELECT 1, username, password, email FROM users --`
 4.  **Nhấn "Tìm Kiếm"**: Quan sát kết quả. Bạn sẽ thấy danh sách các sản phẩm, nhưng kèm theo đó là thông tin `username` và `password` của người dùng từ bảng `users`.
 
 **Giải thích**: Payload này sử dụng toán tử `UNION` để kết hợp kết quả của hai câu truy vấn. Câu truy vấn gốc tìm kiếm sản phẩm, và câu truy vấn thứ hai (được chèn vào) sẽ chọn `username`, `password` từ bảng `users`. Dấu `--` ở cuối dùng để comment phần còn lại của câu truy vấn gốc, tránh lỗi cú pháp.
@@ -154,7 +154,43 @@ SQL Injection và XSS là những lỗ hổng nghiêm trọng có thể gây ra 
 *   **Mã hóa đầu ra (Output Encoding)** cho tất cả dữ liệu do người dùng tạo ra trước khi hiển thị trên trang web.
 *   **Cập nhật kiến thức bảo mật thường xuyên** và tham khảo các tài liệu như OWASP Top 10.
 
-## 7. Tài liệu tham khảo
+## 7. Mở Rộng Lab Đào Sâu
+
+Phiên bản hiện tại đã được mở rộng thêm các hạng mục để sinh viên học sâu hơn:
+
+1. **Blind SQLi (time-based)**:
+   - Endpoint: `/api/blind_check`
+   - Có thể thử payload chứa `sleep(1)` để quan sát độ trễ trong chế độ có lỗ hổng.
+
+2. **DOM XSS + Context Encoding**:
+   - DOM XSS qua hash sink trong frontend.
+   - Endpoint context demo: `/api/xss_context_demo` cho 4 ngữ cảnh (HTML body, attribute, JS string, URL).
+
+3. **Mô phỏng tác động thực tế của XSS**:
+   - Token lab: `/api/lab_token`
+   - Endpoint giả lập attacker: `/api/capture_token`
+
+4. **Mini-CTF và giám sát**:
+   - Cờ CTF theo session: `/api/ctf_flags`
+   - Log sự kiện nghi vấn: `/api/security_events`
+
+5. **Bài tập vá lỗi bắt buộc (Fix-Me)**:
+   - `exercises/fix_me_sqli.py`
+   - `exercises/fix_me_xss.py`
+
+6. **Kiểm chứng tự động**:
+   - `tests/test_security_lab.py`
+   - Chạy bằng `python -m pytest -q`
+
+7. **Thực hành nâng cao bằng DevTools Console**:
+   - Tài liệu mẫu script JavaScript: `docs/devtools_console_examples.md`
+   - Bao gồm: bật/tắt mode, SQLi/Blind SQLi/XSS qua `fetch`, batch payload, đọc cờ CTF và log sự kiện.
+
+8. **Bộ câu hỏi và lời giải thảo luận**:
+   - Câu hỏi: `docs/discussion_questions.md`
+   - Lời giải + dẫn chứng thực tế: `docs/discussion_answers.md`
+
+## 8. Tài liệu tham khảo
 
 [1] OWASP Foundation. (n.d.). *OWASP Top 10*. Retrieved from [https://owasp.org/www-project-top-ten/](https://owasp.org/www-project-top-ten/)
 [2] OWASP Foundation. (n.d.). *SQL Injection*. Retrieved from [https://owasp.org/www-community/attacks/SQL_Injection](https://owasp.org/www-community/attacks/SQL_Injection)
