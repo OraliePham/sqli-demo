@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Injection Demo - Học về Bảo Mật Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card.vulnerable {
+            border-top: 4px solid #e74c3c;
+        }
+
+        .card.secure {
+            border-top: 4px solid #27ae60;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card.vulnerable h2 {
+            color: #e74c3c;
+        }
+
+        .card.secure h2 {
+            color: #27ae60;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .badge.vulnerable {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .badge.secure {
+            background: #27ae60;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #5568d3;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            display: block;
+        }
+
+        .result.fail {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            display: block;
+        }
+
+        .query-display {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            word-break: break-all;
+            color: #333;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            color: #1565c0;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .test-accounts {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            color: #856404;
+        }
+
+        .test-accounts strong {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .account-item {
+            padding: 5px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .footer {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: #666;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+        }
+
+        .footer code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #666;
+        }
+
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 SQL Injection Demo</h1>
+            <p>Học cách tấn công và phòng chống lỗ hổng SQL Injection</p>
+        </div>
+
+        <div class="content">
+            <!-- Card 1: Phiên bản có lỗi -->
+            <div class="card vulnerable">
+                <h2>
+                    ❌ Trang web LỖI
+                    <span class="badge vulnerable">Vulnerable</span>
+                </h2>
+
+                <div class="info-box">
+                    <strong>Cảnh báo:</strong>
+                    Trang này có lỗ hổng SQL Injection. Bạn có thể đăng nhập mà không cần mật khẩu chính xác!
+                </div>
+
+                <div class="test-accounts">
+                    <strong>💡 Hướng dẫn tấn công:</strong>
+                    <div class="account-item">Username: <code>admin' OR '1'='1</code></div>
+                    <div class="account-item">Password: <code>anything</code></div>
+                </div>
+
+                <form id="vulnerableForm">
+                    <div class="form-group">
+                        <label for="vuln-username">Tên đăng nhập:</label>
+                        <input type="text" id="vuln-username" name="username" placeholder="Nhập tên đăng nhập">
+                    </div>
+                    <div class="form-group">
+                        <label for="vuln-password">Mật khẩu:</label>
+                        <input type="password" id="vuln-password" name="password" placeholder="Nhập mật khẩu">
+                    </div>
+                    <button type="submit">Đăng Nhập (Phiên bản Lỗi)</button>
+                </form>
+
+                <div id="vulnerableResult" class="result"></div>
+                <div id="vulnerableLoading" class="loading">
+                    <div class="spinner"></div>
+                    <span>Đang xử lý...</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Phiên bản an toàn -->
+            <div class="card secure">
+                <h2>
+                    ✅ Trang web AN TOÀN
+                    <span class="badge secure">Secure</span>
+                </h2>
+
+                <div class="info-box">
+                    <strong>Thông tin:</strong>
+                    Trang này sử dụng Parameterized Queries. Các ký tự đặc biệt được coi là dữ liệu, không phải mã lệnh.
+                </div>
+
+                <div class="test-accounts">
+                    <strong>💡 Tài khoản test:</strong>
+                    <div class="account-item">admin / p@ssw0rd123</div>
+                    <div class="account-item">manus / ai_assistant_2026</div>
+                    <div class="account-item">demo / demo123</div>
+                </div>
+
+                <form id="secureForm">
+                    <div class="form-group">
+                        <label for="secure-username">Tên đăng nhập:</label>
+                        <input type="text" id="secure-username" name="username" placeholder="Nhập tên đăng nhập">
+                    </div>
+                    <div class="form-group">
+                        <label for="secure-password">Mật khẩu:</label>
+                        <input type="password" id="secure-password" name="password" placeholder="Nhập mật khẩu">
+                    </div>
+                    <button type="submit">Đăng Nhập (Phiên bản An Toàn)</button>
+                </form>
+
+                <div id="secureResult" class="result"></div>
+                <div id="secureLoading" class="loading">
+                    <div class="spinner"></div>
+                    <span>Đang xử lý...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p><strong>📚 Giáo dục Bảo Mật Web</strong></p>
+            <p>Dự án này được tạo để giúp lập trình viên hiểu rõ hơn về lỗ hổng SQL Injection và cách phòng chống.</p>
+            <p>Mã nguồn: <code>Parameterized Queries (Prepared Statements)</code> là cách tốt nhất để ngăn chặn SQLi.</p>
+        </div>
+    </div>
+
+    <script>
+        // Xử lý form Vulnerable
+        document.getElementById('vulnerableForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('vuln-username').value;
+            const password = document.getElementById('vuln-password').value;
+            const resultDiv = document.getElementById('vulnerableResult');
+            const loadingDiv = document.getElementById('vulnerableLoading');
+
+            loadingDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/login_vulnerable', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                loadingDiv.style.display = 'none';
+
+                resultDiv.className = `result ${data.status}`;
+                let html = `<strong>${data.message}</strong>`;
+                
+                if (data.query_executed) {
+                    html += `<div class="query-display"><strong>SQL thực thi:</strong><br>${data.query_executed}</div>`;
+                }
+                
+                resultDiv.innerHTML = html;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Lỗi kết nối: ${error.message}</strong>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        // Xử lý form Secure
+        document.getElementById('secureForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('secure-username').value;
+            const password = document.getElementById('secure-password').value;
+            const resultDiv = document.getElementById('secureResult');
+            const loadingDiv = document.getElementById('secureLoading');
+
+            loadingDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/login_secure', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                loadingDiv.style.display = 'none';
+
+                resultDiv.className = `result ${data.status}`;
+                resultDiv.innerHTML = `<strong>${data.message}</strong>`;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                loadingDiv.style.display = 'none';
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `<strong>❌ Lỗi kết nối: ${error.message}</strong>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
